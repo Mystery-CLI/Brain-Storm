@@ -22,6 +22,10 @@ class ResetPasswordDto {
   @IsString() @MinLength(8) newPassword: string;
 }
 
+class RefreshDto {
+  @IsString() refresh_token: string;
+}
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -37,6 +41,16 @@ export class AuthController {
     return this.authService.login(dto.email, dto.password);
   }
 
+  @Post('refresh')
+  refresh(@Body() dto: RefreshDto) {
+    return this.authService.refresh(dto.refresh_token);
+  }
+
+  @Post('logout')
+  logout(@Body() dto: RefreshDto) {
+    return this.authService.logout(dto.refresh_token);
+  }
+
   @Get('verify')
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
@@ -47,7 +61,6 @@ export class AuthController {
     return this.authService.resendVerification(dto.email);
   }
 
-  // Max 3 forgot-password requests per hour per IP (throttler guard)
   @Throttle({ default: { limit: 3, ttl: 3600000 } })
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
