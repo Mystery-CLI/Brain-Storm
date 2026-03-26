@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { CoursesModule } from './courses/courses.module';
 import { UsersModule } from './users/users.module';
 import { StellarModule } from './stellar/stellar.module';
+import { ProgressModule } from './progress/progress.module';
+import { CredentialsModule } from './credentials/credentials.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import * as redisStore from 'cache-manager-redis-store';
 
@@ -51,6 +53,8 @@ import * as redisStore from 'cache-manager-redis-store';
     CoursesModule,
     UsersModule,
     StellarModule,
+    ProgressModule,
+    CredentialsModule,
     NotificationsModule,
   ],
   providers: [
