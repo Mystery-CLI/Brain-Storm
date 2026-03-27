@@ -14,7 +14,26 @@ pub struct ProgressRecord {
 pub enum DataKey {
     Admin,
     Progress(Address, Symbol),
+    Locked, // reentrancy guard
 }
+
+// ── Reentrancy guard ─────────────────────────────────────────────────────────
+
+fn acquire_lock(env: &Env) {
+    let locked: bool = env
+        .storage()
+        .instance()
+        .get(&DataKey::Locked)
+        .unwrap_or(false);
+    assert!(!locked, "reentrant call");
+    env.storage().instance().set(&DataKey::Locked, &true);
+}
+
+fn release_lock(env: &Env) {
+    env.storage().instance().set(&DataKey::Locked, &false);
+}
+
+// ── Contract ─────────────────────────────────────────────────────────────────
 
 #[contract]
 pub struct AnalyticsContract;

@@ -47,6 +47,65 @@ const BURN: Symbol = symbol_short!("burn");
 #[contract]
 pub struct TokenContract;
 
+// ── Reentrancy guard ─────────────────────────────────────────────────────────
+
+fn acquire_lock(env: &Env) {
+    let locked: bool = env
+        .storage()
+        .instance()
+        .get(&DataKey::Locked)
+        .unwrap_or(false);
+    assert!(!locked, "reentrant call");
+    env.storage().instance().set(&DataKey::Locked, &true);
+}
+
+fn release_lock(env: &Env) {
+    env.storage().instance().set(&DataKey::Locked, &false);
+}
+
+// ── Internal helpers ─────────────────────────────────────────────────────────
+
+fn get_balance(env: &Env, addr: &Address) -> i128 {
+    env.storage()
+        .instance()
+        .get(&DataKey::Balance(addr.clone()))
+        .unwrap_or(0)
+}
+
+fn set_balance(env: &Env, addr: &Address, amount: i128) {
+    env.storage()
+        .instance()
+        .set(&DataKey::Balance(addr.clone()), &amount);
+}
+
+fn get_total_supply(env: &Env) -> i128 {
+    env.storage()
+        .instance()
+        .get(&DataKey::TotalSupply)
+        .unwrap_or(0)
+}
+
+fn set_total_supply(env: &Env, amount: i128) {
+    env.storage()
+        .instance()
+        .set(&DataKey::TotalSupply, &amount);
+}
+
+fn get_allowance(env: &Env, owner: &Address, spender: &Address) -> i128 {
+    env.storage()
+        .instance()
+        .get(&DataKey::Allowance(owner.clone(), spender.clone()))
+        .unwrap_or(0)
+}
+
+fn set_allowance(env: &Env, owner: &Address, spender: &Address, amount: i128) {
+    env.storage()
+        .instance()
+        .set(&DataKey::Allowance(owner.clone(), spender.clone()), &amount);
+}
+
+// ── Contract ─────────────────────────────────────────────────────────────────
+
 #[contractimpl]
 impl TokenContract {
     // -------------------------------------------------------------------------
@@ -265,6 +324,8 @@ impl TokenContract {
     // -------------------------------------------------------------------------
 
     pub fn mint_reward(env: Env, caller: Address, recipient: Address, amount: i128) {
+        acquire_lock(&env);
+
         caller.require_auth();
         let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
         assert!(caller == admin, "Only admin can mint");
@@ -573,3 +634,5 @@ mod tests {
         client.initialize(&admin);
     }
 }
+
+mod tests;
