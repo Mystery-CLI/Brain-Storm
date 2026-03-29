@@ -47,6 +47,19 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get(':id/token-balance')
+  @ApiOperation({ summary: 'Get BST token balance for a user' })
+  @ApiResponse({ status: 200, description: 'Returns BST token balance', schema: { example: { balance: '1000', stellarPublicKey: 'G...' } } })
+  @ApiResponse({ status: 404, description: 'User not found or no Stellar key linked' })
+  async getTokenBalance(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.stellarPublicKey) throw new NotFoundException('User has no Stellar public key linked');
+    const balance = await this.stellarService.getTokenBalance(user.stellarPublicKey);
+    return { balance, stellarPublicKey: user.stellarPublicKey };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
