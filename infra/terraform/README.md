@@ -83,3 +83,11 @@ For development/staging environments, adjust in `terraform.tfvars`:
 - Use smaller instance classes
 - Reduce ECS task counts
 - Disable multi-AZ for RDS and Redis
+
+## GitHub Actions OIDC
+
+The `oidc` module provisions:
+- An AWS IAM OIDC identity provider for `token.actions.githubusercontent.com`
+- A least-privilege `GitHubActionsDeploymentRole` IAM role
+
+After `terraform apply`, copy the `github_actions_role_arn` output and add it as the `AWS_ROLE_ARN` secret in your GitHub repository. Remove any existing `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` secrets.

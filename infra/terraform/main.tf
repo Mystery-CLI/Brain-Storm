@@ -74,3 +74,10 @@ module "alb" {
   backend_target_group_arn  = module.ecs.backend_target_group_arn
   frontend_target_group_arn = module.ecs.frontend_target_group_arn
 }
+
+module "oidc" {
+  source = "./modules/oidc"
+
+  github_org  = var.github_org
+  github_repo = var.github_repo
+}

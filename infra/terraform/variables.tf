@@ -54,3 +54,14 @@ variable "frontend_image" {
   description = "Docker image for frontend service"
   type        = string
 }
+
+variable "github_org" {
+  description = "GitHub organization or username owning this repo"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "GitHub repository name"
+  type        = string
+  default     = "Brain-Storm"
+}

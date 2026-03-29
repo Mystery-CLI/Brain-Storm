@@ -17,3 +17,7 @@ redis_node_type = "cache.t3.micro"
 # Application Images
 backend_image  = "your-registry/brain-storm-backend:latest"
 frontend_image = "your-registry/brain-storm-frontend:latest"
+
+# GitHub OIDC
+github_org  = "your-github-org"
+github_repo = "Brain-Storm"
