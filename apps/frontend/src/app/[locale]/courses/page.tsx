@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 export default function CoursesPage() {
   const t = useTranslations('courses');
@@ -11,7 +12,8 @@ export default function CoursesPage() {
   ];
 
   return (
-    <main className="max-w-4xl mx-auto p-8">
+    <ProtectedRoute>
+      <main className="max-w-4xl mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">{t('title')}</h1>
       {/* List semantics so screen readers announce item count */}
       <ul className="grid gap-4 list-none p-0">
@@ -50,5 +52,6 @@ export default function CoursesPage() {
         ))}
       </div>
     </main>
+    </ProtectedRoute>
   );
 }

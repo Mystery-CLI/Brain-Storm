@@ -3,8 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { Navbar } from '@/components/Navbar';
+import { ClientProviders } from '@/components/ClientProviders';
 import '../globals.css';
 
 export const metadata: Metadata = {
@@ -32,18 +31,13 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
+          <ClientProviders>
             {/* Skip-to-content — first focusable element on every page */}
             <a href="#main-content" className="skip-link">
               Skip to main content
             </a>
-            <Navbar />
-            <div id="main-content" tabIndex={-1}>
-              {children}
-            </div>
-            <Navbar />
             {children}
-          </ThemeProvider>
+          </ClientProviders>
         </NextIntlClientProvider>
       </body>
     </html>

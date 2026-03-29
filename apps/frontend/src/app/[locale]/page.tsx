@@ -1,11 +1,13 @@
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 export default function HomePage() {
   const t = useTranslations('home');
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8">
+    <ProtectedRoute>
+      <main className="min-h-screen flex flex-col items-center justify-center p-8">
       <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">{t('title')}</h1>
       <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 text-center max-w-xl">
         {t('description')}
@@ -33,5 +35,6 @@ export default function HomePage() {
         </Link>
       </div>
     </main>
+    </ProtectedRoute>
   );
 }
