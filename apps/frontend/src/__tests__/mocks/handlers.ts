@@ -24,6 +24,32 @@ export const handlers = [
       avatarUrl: '',
       bio: '',
       createdAt: '2024-01-01T00:00:00.000Z',
+      stellarPublicKey: 'GABC...',
     }),
+  ),
+
+  http.get(`${BASE}/users/user-1/token-balance`, () =>
+    HttpResponse.json({ balance: 850 }),
+  ),
+
+  http.get(`${BASE}/users/user-1/progress`, () =>
+    HttpResponse.json([
+      { id: 'progress-1', userId: 'user-1', courseId: '1', progressPct: 45 },
+      { id: 'progress-2', userId: 'user-1', courseId: '2', progressPct: 100 },
+    ]),
+  ),
+
+  http.get(`${BASE}/credentials/user-1`, () =>
+    HttpResponse.json([
+      { id: 'cred-123', userId: 'user-1', courseId: '2', issuedAt: '2026-03-28T15:00:00.000Z', course: { id: '2', title: 'Soroban Smart Contracts' } },
+    ]),
+  ),
+
+  http.get(`${BASE}/courses/1`, () =>
+    HttpResponse.json({ id: '1', title: 'Intro to Stellar Blockchain' }),
+  ),
+
+  http.get(`${BASE}/courses/2`, () =>
+    HttpResponse.json({ id: '2', title: 'Soroban Smart Contracts' }),
   ),
 ];
