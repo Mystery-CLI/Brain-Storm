@@ -1,17 +1,43 @@
-import { Controller, Get, Post, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Param,
+  Post,
+  StreamableFile,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { CredentialsService } from './credentials.service';
+import { CertificatePdfService } from './certificate-pdf.service';
 
 @ApiTags('credentials')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('credentials')
 export class CredentialsController {
-  constructor(private credentialsService: CredentialsService) {}
+  constructor(
+    private credentialsService: CredentialsService,
+    private certificatePdfService: CertificatePdfService,
+  ) {}
+
+  @Get(':id/pdf')
+  @Header('Content-Type', 'application/pdf')
+  @ApiOperation({ summary: 'Download a credential as a PDF certificate' })
+  @ApiResponse({ status: 200, description: 'PDF certificate generated successfully' })
+  async downloadPdf(@Param('id') id: string) {
+    const credential = await this.credentialsService.findOne(id);
+    const pdf = this.certificatePdfService.generateCertificatePdf(credential);
+    return new StreamableFile(pdf, {
+      disposition: `attachment; filename="credential-${id}.pdf"`,
+      type: 'application/pdf',
+    });
+  }
 
   @Get(':userId')
   @ApiOperation({ summary: 'List all credentials for a user' })

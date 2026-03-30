@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Credential } from './credential.entity';
@@ -31,6 +31,19 @@ export class CredentialsService {
 
   findByUser(userId: string) {
     return this.repo.find({ where: { userId }, order: { issuedAt: 'DESC' } });
+  }
+
+  async findOne(id: string) {
+    const credential = await this.repo.findOne({
+      where: { id },
+      relations: ['user', 'course'],
+    });
+
+    if (!credential) {
+      throw new NotFoundException('Credential not found');
+    }
+
+    return credential;
   }
 
   async verify(txHash: string) {
