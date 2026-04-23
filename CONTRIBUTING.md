@@ -117,3 +117,15 @@ See [docs/development-setup.md](docs/development-setup.md) for the full setup gu
 ## Security
 
 If you discover a security vulnerability, **do not open a public issue**. Follow our [Security Policy](SECURITY.md) for responsible disclosure.
+
+## API Versioning
+
+All REST endpoints are prefixed with `/v1`. Before introducing any breaking change you **must** follow the process in [docs/api-versioning.md](docs/api-versioning.md). In short:
+
+1. Implement the change under a new prefix (`/v2/...`) — never modify `/v1` in place.
+2. Mark the old endpoint deprecated in Swagger (`@ApiOperation({ deprecated: true })`).
+3. Add `Deprecation` and `Sunset` response headers to the old endpoint.
+4. Use a `feat!:` or `BREAKING CHANGE:` commit so Release Please bumps the major version.
+5. Keep both versions running for **at least 90 days** before removing `/v1`.
+
+See [docs/api-versioning.md](docs/api-versioning.md) for the full strategy, deprecation timeline, and migration examples.

@@ -89,7 +89,9 @@ export default function WalletSection({ userId, stellarPublicKey, onLinked, onUn
               BST Balance: <span className="font-semibold">{bstBalance} BST</span>
             </p>
           )}
-          <Button variant="outline" onClick={unlinkWallet}>Unlink Wallet</Button>
+          <Button variant="outline" onClick={unlinkWallet}>
+            Unlink Wallet
+          </Button>
           {process.env.NEXT_PUBLIC_STELLAR_NETWORK === 'testnet' && (
             <div className="space-y-1">
               <Button variant="outline" onClick={fundTestnet} disabled={funding}>

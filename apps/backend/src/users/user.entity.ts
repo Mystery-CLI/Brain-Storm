@@ -47,6 +47,12 @@ export class User {
   @Column({ nullable: true })
   mfaSecret: string | null;
 
+  @Column({ unique: true, nullable: true })
+  referralCode: string;
+
+  @Column({ nullable: true, type: 'varchar' })
+  referredBy: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

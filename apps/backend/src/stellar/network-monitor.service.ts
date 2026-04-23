@@ -23,12 +23,12 @@ export class NetworkMonitorService implements OnModuleInit {
     setInterval(() => this.checkHealth(), 60000);
   }
 
-  private async checkService(url: string, type: 'horizon' | 'soroban'): Promise<ServiceStatus> {
+  private async checkService(url: string, _type: 'horizon' | 'soroban'): Promise<ServiceStatus> {
     const start = Date.now();
     try {
       const response = await axios.get(url, { timeout: 5000 });
       const latency = Date.now() - start;
-      
+
       return {
         status: response.status === 200 ? 'healthy' : 'unstable',
         url,
@@ -48,13 +48,14 @@ export class NetworkMonitorService implements OnModuleInit {
 
   async checkHealth() {
     const isTestnet = this.configService.get('STELLAR_NETWORK') !== 'mainnet';
-    const horizonUrl = isTestnet 
-      ? 'https://horizon-testnet.stellar.org' 
+    const horizonUrl = isTestnet
+      ? 'https://horizon-testnet.stellar.org'
       : 'https://horizon.stellar.org';
-    const sorobanUrl = this.configService.get('SOROBAN_RPC_URL') || 'https://soroban-testnet.stellar.org';
+    const sorobanUrl =
+      this.configService.get('SOROBAN_RPC_URL') || 'https://soroban-testnet.stellar.org';
 
     this.logger.log('Performing network health checks...');
-    
+
     const [horizonStatus, sorobanStatus] = await Promise.all([
       this.checkService(horizonUrl, 'horizon'),
       this.checkService(sorobanUrl, 'soroban'),
@@ -68,9 +69,13 @@ export class NetworkMonitorService implements OnModuleInit {
     };
 
     if (this.status.horizon.status !== 'healthy' || this.status.soroban.status !== 'healthy') {
-      this.logger.warn(`Network monitoring alert: Horizon ${this.status.horizon.status}, Soroban ${this.status.soroban.status}`);
+      this.logger.warn(
+        `Network monitoring alert: Horizon ${this.status.horizon.status}, Soroban ${this.status.soroban.status}`
+      );
     } else {
-      this.logger.log(`Network health check passed: Horizon ${horizonStatus.latencyMs}ms, Soroban ${sorobanStatus.latencyMs}ms`);
+      this.logger.log(
+        `Network health check passed: Horizon ${horizonStatus.latencyMs}ms, Soroban ${sorobanStatus.latencyMs}ms`
+      );
     }
   }
 

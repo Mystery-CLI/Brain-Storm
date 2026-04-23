@@ -8,25 +8,16 @@ export class NotificationsEvents {
 
   @OnEvent('enrollment.created')
   async handleEnrollmentCreated(payload: { userId: string; courseName: string }) {
-    await this.notificationsService.onEnrollmentCreated(
-      payload.userId,
-      payload.courseName,
-    );
+    await this.notificationsService.onEnrollmentCreated(payload.userId, payload.courseName);
   }
 
   @OnEvent('credential.issued')
   async handleCredentialIssued(payload: { userId: string; courseName: string }) {
-    await this.notificationsService.onCredentialIssued(
-      payload.userId,
-      payload.courseName,
-    );
+    await this.notificationsService.onCredentialIssued(payload.userId, payload.courseName);
   }
 
   @OnEvent('progress.completed')
   async handleProgressCompleted(payload: { userId: string; courseName: string }) {
-    await this.notificationsService.onProgressCompleted(
-      payload.userId,
-      payload.courseName,
-    );
+    await this.notificationsService.onProgressCompleted(payload.userId, payload.courseName);
   }
 }

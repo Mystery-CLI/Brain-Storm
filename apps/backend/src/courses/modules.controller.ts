@@ -1,7 +1,4 @@
-import {
-  Body, Controller, Delete, Get, Param,
-  Patch, Post, UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -16,14 +13,18 @@ import { CreateLessonDto } from './dto/create-lesson.dto';
 export class ModulesController {
   constructor(
     private modulesService: ModulesService,
-    private lessonsService: LessonsService,
+    private lessonsService: LessonsService
   ) {}
 
   // ── Modules ──────────────────────────────────────────────────────────────
 
   @Get('courses/:courseId/modules')
   @ApiOperation({ summary: 'Get all modules for a course' })
-  @ApiResponse({ status: 200, description: 'List of modules', schema: { example: [{ id: 'uuid', title: 'Module 1', order: 1 }] } })
+  @ApiResponse({
+    status: 200,
+    description: 'List of modules',
+    schema: { example: [{ id: 'uuid', title: 'Module 1', order: 1 }] },
+  })
   @ApiResponse({ status: 404, description: 'Course not found' })
   getModules(@Param('courseId') courseId: string) {
     return this.modulesService.findByCourse(courseId);
@@ -35,13 +36,14 @@ export class ModulesController {
   @Post('courses/:courseId/modules')
   @ApiOperation({ summary: 'Create a module in a course' })
   @ApiBody({ schema: { example: { title: 'Module 1', description: 'Intro module', order: 1 } } })
-  @ApiResponse({ status: 201, description: 'Module created', schema: { example: { id: 'uuid', title: 'Module 1' } } })
+  @ApiResponse({
+    status: 201,
+    description: 'Module created',
+    schema: { example: { id: 'uuid', title: 'Module 1' } },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  createModule(
-    @Param('courseId') courseId: string,
-    @Body() dto: CreateModuleDto,
-  ) {
+  createModule(@Param('courseId') courseId: string, @Body() dto: CreateModuleDto) {
     return this.modulesService.create(courseId, dto);
   }
 
@@ -76,7 +78,11 @@ export class ModulesController {
 
   @Get('modules/:moduleId/lessons')
   @ApiOperation({ summary: 'Get all lessons for a module' })
-  @ApiResponse({ status: 200, description: 'List of lessons', schema: { example: [{ id: 'uuid', title: 'Lesson 1', order: 1 }] } })
+  @ApiResponse({
+    status: 200,
+    description: 'List of lessons',
+    schema: { example: [{ id: 'uuid', title: 'Lesson 1', order: 1 }] },
+  })
   @ApiResponse({ status: 404, description: 'Module not found' })
   getLessons(@Param('moduleId') moduleId: string) {
     return this.lessonsService.findByModule(moduleId);
@@ -88,13 +94,14 @@ export class ModulesController {
   @Post('modules/:moduleId/lessons')
   @ApiOperation({ summary: 'Create a lesson in a module' })
   @ApiBody({ schema: { example: { title: 'Lesson 1', content: 'Content here', order: 1 } } })
-  @ApiResponse({ status: 201, description: 'Lesson created', schema: { example: { id: 'uuid', title: 'Lesson 1' } } })
+  @ApiResponse({
+    status: 201,
+    description: 'Lesson created',
+    schema: { example: { id: 'uuid', title: 'Lesson 1' } },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  createLesson(
-    @Param('moduleId') moduleId: string,
-    @Body() dto: CreateLessonDto,
-  ) {
+  createLesson(@Param('moduleId') moduleId: string, @Body() dto: CreateLessonDto) {
     return this.lessonsService.create(moduleId, dto);
   }
 

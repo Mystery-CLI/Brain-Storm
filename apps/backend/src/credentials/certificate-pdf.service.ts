@@ -27,7 +27,7 @@ export class CertificatePdfService {
       '/F1 18 Tf',
       ...lines.map(
         ({ size, x, y, text }) =>
-          `BT /F1 ${size} Tf 1 0 0 1 ${x} ${y} Tm (${this.escapePdfText(text)}) Tj ET`,
+          `BT /F1 ${size} Tf 1 0 0 1 ${x} ${y} Tm (${this.escapePdfText(text)}) Tj ET`
       ),
       'ET',
     ].join('\n');
@@ -66,9 +66,6 @@ export class CertificatePdfService {
   }
 
   private escapePdfText(value: string) {
-    return value
-      .replace(/\\/g, '\\\\')
-      .replace(/\(/g, '\\(')
-      .replace(/\)/g, '\\)');
+    return value.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
   }
 }

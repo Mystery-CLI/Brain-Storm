@@ -10,7 +10,10 @@ export class CreateReplyDto {
   @Sanitize(StripHtmlSanitizer)
   content: string;
 
-  @ApiPropertyOptional({ description: 'Mark the reply as the answer (instructors/admins only)', default: false })
+  @ApiPropertyOptional({
+    description: 'Mark the reply as the answer (instructors/admins only)',
+    default: false,
+  })
   @IsOptional()
   @IsBoolean()
   isAnswer?: boolean;

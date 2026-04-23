@@ -24,7 +24,7 @@ export class LeaderboardService {
     private readonly userRepo: Repository<User>,
     private readonly stellarService: StellarService,
     @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
+    private readonly cacheManager: Cache
   ) {}
 
   async getTopUsers() {
@@ -38,9 +38,7 @@ export class LeaderboardService {
       order: { createdAt: 'DESC' },
     });
 
-    const walletUsers = users.filter(
-      (user) => Boolean(user.stellarPublicKey) && !user.deletedAt,
-    );
+    const walletUsers = users.filter((user) => Boolean(user.stellarPublicKey) && !user.deletedAt);
 
     const balances = await Promise.all(
       walletUsers.map(async (user) => {
@@ -62,7 +60,7 @@ export class LeaderboardService {
             balance: '0',
           };
         }
-      }),
+      })
     );
 
     const leaderboard = balances

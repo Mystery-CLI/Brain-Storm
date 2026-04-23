@@ -29,7 +29,12 @@ describe('ApiKeyStrategy', () => {
     const rawKey = 'bst_testkey123';
     const hash = crypto.createHash('sha256').update(rawKey).digest('hex');
     const fakeUser = { id: 'user-1', email: 'svc@example.com', role: 'admin' };
-    mockApiKeyRepo.findOne.mockResolvedValue({ id: 'key-1', keyHash: hash, isActive: true, user: fakeUser });
+    mockApiKeyRepo.findOne.mockResolvedValue({
+      id: 'key-1',
+      keyHash: hash,
+      isActive: true,
+      user: fakeUser,
+    });
 
     await new Promise<void>((resolve) => {
       (strategy as any).verify(rawKey, (err: any, user: any) => {

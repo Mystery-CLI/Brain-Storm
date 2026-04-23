@@ -7,10 +7,10 @@ import * as path from 'path';
 
 /**
  * Soroban Testnet Integration Tests
- * 
+ *
  * These tests deploy the Analytics contract to a local Soroban sandbox
  * and verify contract interactions work correctly.
- * 
+ *
  * Run only on main branch pushes to avoid rate limits.
  * Requires: stellar-cli, docker
  */
@@ -24,7 +24,7 @@ describe('StellarService - Soroban Testnet (Integration)', () => {
     // Skip if not on main branch or in CI
     const isMainBranch = process.env.GITHUB_REF === 'refs/heads/main';
     const isCi = process.env.CI === 'true';
-    
+
     if (!isMainBranch && isCi) {
       console.log('Skipping Soroban tests (not on main branch)');
       return;
@@ -33,9 +33,12 @@ describe('StellarService - Soroban Testnet (Integration)', () => {
     // Start local Soroban sandbox
     try {
       console.log('Starting Soroban sandbox...');
-      execSync('stellar network add --rpc-url http://localhost:8000 --network-passphrase "Test SDF Network ; September 2015" local', {
-        stdio: 'pipe',
-      });
+      execSync(
+        'stellar network add --rpc-url http://localhost:8000 --network-passphrase "Test SDF Network ; September 2015" local',
+        {
+          stdio: 'pipe',
+        }
+      );
       sandboxRunning = true;
     } catch (error) {
       console.warn('Could not start Soroban sandbox:', error.message);
@@ -53,7 +56,9 @@ describe('StellarService - Soroban Testnet (Integration)', () => {
               const config = {
                 'stellar.network': 'testnet',
                 'stellar.sorobanRpcUrl': 'http://localhost:8000',
-                'stellar.secretKey': process.env.STELLAR_SECRET_KEY || 'SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                'stellar.secretKey':
+                  process.env.STELLAR_SECRET_KEY ||
+                  'SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
                 'stellar.contractId': process.env.ANALYTICS_CONTRACT_ID || '',
               };
               return config[key];
@@ -82,13 +87,13 @@ describe('StellarService - Soroban Testnet (Integration)', () => {
       try {
         const contractPath = path.join(
           __dirname,
-          '../../../contracts/analytics/target/wasm32-unknown-unknown/release/brain_storm_analytics.wasm',
+          '../../../contracts/analytics/target/wasm32-unknown-unknown/release/brain_storm_analytics.wasm'
         );
 
         // Deploy contract
         const output = execSync(
           `stellar contract deploy --wasm ${contractPath} --source-account test --network local`,
-          { encoding: 'utf-8' },
+          { encoding: 'utf-8' }
         );
 
         // Extract contract ID from output
@@ -125,7 +130,7 @@ describe('StellarService - Soroban Testnet (Integration)', () => {
 
         const output = execSync(
           `stellar contract invoke --id ${contractId} --source-account test --network local -- record_progress ${studentId} ${courseId} ${progress}`,
-          { encoding: 'utf-8' },
+          { encoding: 'utf-8' }
         );
 
         expect(output).toBeTruthy();
@@ -164,9 +169,9 @@ describe('StellarService - Soroban Testnet (Integration)', () => {
 
       try {
         const invalidContractId = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4';
-        const output = execSync(
+        execSync(
           `stellar contract invoke --id ${invalidContractId} --source-account test --network local -- record_progress test test 0`,
-          { encoding: 'utf-8', stdio: 'pipe' },
+          { encoding: 'utf-8', stdio: 'pipe' }
         );
       } catch (error) {
         // Expected to fail

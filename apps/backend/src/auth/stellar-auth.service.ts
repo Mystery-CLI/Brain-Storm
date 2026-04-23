@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Keypair, Networks, Utils } from '@stellar/stellar-sdk';
+import { Keypair, Networks, WebAuth } from '@stellar/stellar-sdk';
 import { UsersService } from '../users/users.service';
 
 const CHALLENGE_TTL_SECONDS = 300; // 5 minutes
@@ -15,25 +15,25 @@ export class StellarAuthService {
   constructor(
     private configService: ConfigService,
     private jwtService: JwtService,
-    private usersService: UsersService,
+    private usersService: UsersService
   ) {
     this.serverKeypair = Keypair.fromSecret(
-      this.configService.get<string>('stellar.secretKey'),
+      this.configService.get<string>('stellar.secretKey') ?? ''
     );
     const isTestnet = this.configService.get<string>('stellar.network') !== 'mainnet';
     this.networkPassphrase = isTestnet ? Networks.TESTNET : Networks.PUBLIC;
-    this.webAuthDomain = this.configService.get<string>('stellar.webAuthDomain');
+    this.webAuthDomain = this.configService.get<string>('stellar.webAuthDomain') ?? '';
   }
 
   /** GET /auth/stellar?account=G... — returns a SEP-0010 challenge XDR */
   buildChallenge(clientPublicKey: string): { transaction: string; network_passphrase: string } {
-    const transaction = Utils.buildChallengeTx(
+    const transaction = WebAuth.buildChallengeTx(
       this.serverKeypair,
       clientPublicKey,
       this.webAuthDomain,
       CHALLENGE_TTL_SECONDS,
       this.networkPassphrase,
-      this.webAuthDomain,
+      this.webAuthDomain
     );
     return { transaction, network_passphrase: this.networkPassphrase };
   }
@@ -42,12 +42,12 @@ export class StellarAuthService {
   async verifyChallenge(signedXdr: string): Promise<{ access_token: string }> {
     let clientPublicKey: string;
     try {
-      const { clientAccountID } = Utils.readChallengeTx(
+      const { clientAccountID } = WebAuth.readChallengeTx(
         signedXdr,
         this.serverKeypair.publicKey(),
         this.networkPassphrase,
         this.webAuthDomain,
-        this.webAuthDomain,
+        this.webAuthDomain
       );
       clientPublicKey = clientAccountID;
     } catch (err) {
@@ -67,7 +67,7 @@ export class StellarAuthService {
 
     const access_token = this.jwtService.sign(
       { sub: user.id, email: user.email, role: user.role },
-      { expiresIn: '15m' },
+      { expiresIn: '15m' }
     );
     return { access_token };
   }

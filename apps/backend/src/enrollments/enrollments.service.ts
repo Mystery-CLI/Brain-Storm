@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -13,16 +9,14 @@ export class EnrollmentsService {
   constructor(
     @InjectRepository(Enrollment)
     private repo: Repository<Enrollment>,
-    private eventEmitter: EventEmitter2,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async enroll(userId: string, courseId: string): Promise<Enrollment> {
     const existing = await this.repo.findOne({ where: { userId, courseId } });
     if (existing) throw new ConflictException('Already enrolled in this course');
 
-    const enrollment = await this.repo.save(
-      this.repo.create({ userId, courseId }),
-    );
+    const enrollment = await this.repo.save(this.repo.create({ userId, courseId }));
 
     this.eventEmitter.emit('enrollment.created', {
       enrollmentId: enrollment.id,

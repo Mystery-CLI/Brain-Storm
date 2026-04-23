@@ -15,7 +15,7 @@ import { CertificatePdfService } from './certificate-pdf.service';
     KycModule,
     CoursesModule,
   ],
-  providers: [CredentialsService],
+  providers: [CredentialsService, CertificatePdfService],
   controllers: [CredentialsController],
   exports: [CredentialsService],
 })

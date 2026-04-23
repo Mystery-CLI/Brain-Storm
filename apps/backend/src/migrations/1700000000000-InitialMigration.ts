@@ -55,7 +55,7 @@ export class InitialMigration1700000000000 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
 
     // Create courses table
@@ -100,7 +100,7 @@ export class InitialMigration1700000000000 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
 
     // Create notifications table
@@ -140,7 +140,7 @@ export class InitialMigration1700000000000 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
   }
 

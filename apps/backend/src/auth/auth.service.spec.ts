@@ -11,9 +11,6 @@ import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let usersService: UsersService;
-  let jwtService: JwtService;
-  let mailService: MailService;
 
   const mockUsersService = {
     findByEmail: jest.fn(),
@@ -91,7 +88,13 @@ describe('AuthService', () => {
     const email = 'test@example.com';
     const password = 'password123';
     const hashedPassword = 'hashedPassword';
-    const user = { id: 'uuid', email, passwordHash: hashedPassword, isVerified: true, isBanned: false };
+    const user = {
+      id: 'uuid',
+      email,
+      passwordHash: hashedPassword,
+      isVerified: true,
+      isBanned: false,
+    };
 
     it('should successfully login and return tokens (happy path)', async () => {
       mockUsersService.findByEmail.mockResolvedValue(user);

@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { StellarAuthService } from './stellar-auth.service';
-import { GoogleAuthGuard } from './google-auth.guard';
-import { GoogleProfile } from './google.strategy';
+import { GoogleAuthGuard } from './google-auth.guard'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { GoogleProfile } from './google.strategy'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Roles } from './roles.decorator';
@@ -43,12 +43,15 @@ class RefreshDto {
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private stellarAuthService: StellarAuthService,
+    private stellarAuthService: StellarAuthService
   ) {}
 
   @Get('stellar')
   @ApiOperation({ summary: 'SEP-0010: get challenge transaction' })
-  @ApiResponse({ status: 200, description: 'Returns unsigned challenge XDR and network passphrase' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns unsigned challenge XDR and network passphrase',
+  })
   stellarChallenge(@Query('account') account: string) {
     return this.stellarAuthService.buildChallenge(account);
   }
@@ -66,18 +69,26 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ schema: { example: { email: 'user@example.com', password: 'password123' } } })
-  @ApiResponse({ status: 201, description: 'User registered successfully', schema: { example: { access_token: 'jwt', refresh_token: 'token' } } })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered successfully',
+    schema: { example: { access_token: 'jwt', refresh_token: 'token' } },
+  })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 409, description: 'User already exists' })
-  register(@Body() dto: AuthDto) {
-    return this.authService.register(dto.email, dto.password);
+  register(@Body() dto: AuthDto, @Query('ref') ref?: string) {
+    return this.authService.register(dto.email, dto.password, ref);
   }
 
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ schema: { example: { email: 'user@example.com', password: 'password123' } } })
-  @ApiResponse({ status: 200, description: 'Login successful', schema: { example: { access_token: 'jwt', refresh_token: 'token' } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    schema: { example: { access_token: 'jwt', refresh_token: 'token' } },
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password, dto.mfa_token);
@@ -86,7 +97,11 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({ schema: { example: { refresh_token: 'token' } } })
-  @ApiResponse({ status: 200, description: 'New access token issued', schema: { example: { access_token: 'jwt' } } })
+  @ApiResponse({
+    status: 200,
+    description: 'New access token issued',
+    schema: { example: { access_token: 'jwt' } },
+  })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   refresh(@Body() dto: RefreshDto) {
     return this.authService.refresh(dto.refresh_token);
@@ -138,19 +153,19 @@ export class AuthController {
 
   @Post('mfa/enable')
   @UseGuards(JwtAuthGuard)
-  enableMfa(@Request() req) {
+  enableMfa(@Req() req) {
     return this.authService.generateMfaSecret(req.user.id);
   }
 
   @Post('mfa/verify')
   @UseGuards(JwtAuthGuard)
-  verifyMfa(@Request() req, @Body('code') code: string) {
+  verifyMfa(@Req() req, @Body('code') code: string) {
     return this.authService.verifyMfaSecret(req.user.id, code);
   }
 
   @Post('mfa/disable')
   @UseGuards(JwtAuthGuard)
-  disableMfa(@Request() req, @Body('code') code: string) {
+  disableMfa(@Req() req, @Body('code') code: string) {
     return this.authService.disableMfa(req.user.id, code);
   }
 
@@ -186,10 +201,10 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Invalid signature or challenge' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   verifyStellarSignature(
-    @Request() req,
+    @Req() req,
     @Body('publicKey') publicKey: string,
     @Body('signature') signature: string,
-    @Body('challenge') challenge: string,
+    @Body('challenge') challenge: string
   ) {
     return this.authService.verifyStellarSignature(req.user.id, publicKey, signature, challenge);
   }

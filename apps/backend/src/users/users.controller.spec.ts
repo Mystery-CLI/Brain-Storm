@@ -25,11 +25,16 @@ describe('UsersController', () => {
     const dto = { username: 'TestUser' };
     mockService.update.mockResolvedValue({ id: '1', ...dto });
 
-    await expect(controller.update('1', dto, { user: { id: '1' } })).resolves.toEqual({ id: '1', ...dto });
+    await expect(controller.update('1', dto, { user: { id: '1' } })).resolves.toEqual({
+      id: '1',
+      ...dto,
+    });
     expect(mockService.update).toHaveBeenCalledWith('1', dto);
   });
 
   it('update should throw ForbiddenException for different user', async () => {
-    await expect(controller.update('1', { username: 'X' }, { user: { id: '2' } })).rejects.toThrow(ForbiddenException);
+    await expect(controller.update('1', { username: 'X' }, { user: { id: '2' } })).rejects.toThrow(
+      ForbiddenException
+    );
   });
 });

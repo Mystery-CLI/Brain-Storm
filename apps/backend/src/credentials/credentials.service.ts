@@ -1,4 +1,10 @@
-import { Injectable, Inject, forwardRef, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  forwardRef,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Credential } from './credential.entity';
@@ -12,7 +18,7 @@ export class CredentialsService {
     @InjectRepository(Credential) private repo: Repository<Credential>,
     @Inject(forwardRef(() => StellarService)) private stellarService: StellarService,
     private kycService: KycService,
-    private coursesService: CoursesService,
+    private coursesService: CoursesService
   ) {}
 
   async issue(userId: string, courseId: string, stellarPublicKey: string): Promise<Credential> {
@@ -26,7 +32,7 @@ export class CredentialsService {
       const approved = await this.kycService.isApproved(stellarPublicKey);
       if (!approved) {
         throw new ForbiddenException(
-          'KYC verification required before credential issuance for this course',
+          'KYC verification required before credential issuance for this course'
         );
       }
     }
@@ -63,7 +69,6 @@ export class CredentialsService {
 
   async verify(txHash: string) {
     const credential = await this.repo.findOne({ where: { txHash } });
-    const onChain = await this.stellarService.verifyCredential(txHash);
-    return { credential, ...onChain };
+    return { credential, verified: !!credential };
   }
 }

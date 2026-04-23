@@ -1,18 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
@@ -38,7 +25,7 @@ export class ForumsController {
   createPost(
     @Param('id') courseId: string,
     @Request() req: { user: { id: string; role: string } },
-    @Body() dto: CreatePostDto,
+    @Body() dto: CreatePostDto
   ) {
     return this.forumsService.createPost(courseId, req.user.id, req.user.role, dto);
   }
@@ -51,7 +38,7 @@ export class ForumsController {
   createReply(
     @Param('id') postId: string,
     @Request() req: { user: { id: string; role: string } },
-    @Body() dto: CreateReplyDto,
+    @Body() dto: CreateReplyDto
   ) {
     return this.forumsService.createReply(postId, req.user.id, req.user.role, dto);
   }

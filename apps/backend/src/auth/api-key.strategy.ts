@@ -10,7 +10,7 @@ import * as crypto from 'crypto';
 export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-key') {
   constructor(
     @InjectRepository(ApiKey)
-    private apiKeyRepo: Repository<ApiKey>,
+    private apiKeyRepo: Repository<ApiKey>
   ) {
     super(
       { header: 'X-API-KEY', prefix: '' },
@@ -30,7 +30,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-
         this.apiKeyRepo.update(key.id, { lastUsedAt: new Date() }).catch(() => {});
 
         return done(null, key.user);
-      },
+      }
     );
   }
 }

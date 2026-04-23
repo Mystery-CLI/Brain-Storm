@@ -36,7 +36,7 @@ export class AddForums1711900000000 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
 
     await queryRunner.createTable(
@@ -71,7 +71,7 @@ export class AddForums1711900000000 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
   }
 

@@ -10,24 +10,25 @@ import * as winston from 'winston';
       useFactory: (configService: ConfigService) => {
         const logLevel = configService.get<string>('LOG_LEVEL', 'info');
         const nodeEnv = configService.get<string>('NODE_ENV', 'development');
-        
+
         // Define log format based on environment
-        const logFormat = nodeEnv === 'production' 
-          ? winston.format.combine(
-              winston.format.timestamp(),
-              winston.format.errors({ stack: true }),
-              winston.format.json()
-            )
-          : winston.format.combine(
-              winston.format.timestamp(),
-              winston.format.errors({ stack: true }),
-              winston.format.colorize(),
-              winston.format.printf(({ timestamp, level, message, context, ...meta }) => {
-                const contextStr = context ? `[${context}] ` : '';
-                const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-                return `${timestamp} ${level}: ${contextStr}${message}${metaStr}`;
-              })
-            );
+        const logFormat =
+          nodeEnv === 'production'
+            ? winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.errors({ stack: true }),
+                winston.format.json()
+              )
+            : winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.errors({ stack: true }),
+                winston.format.colorize(),
+                winston.format.printf(({ timestamp, level, message, context, ...meta }) => {
+                  const contextStr = context ? `[${context}] ` : '';
+                  const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
+                  return `${timestamp} ${level}: ${contextStr}${message}${metaStr}`;
+                })
+              );
 
         return {
           level: logLevel,

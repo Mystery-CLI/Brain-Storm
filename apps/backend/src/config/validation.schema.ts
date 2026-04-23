@@ -43,9 +43,7 @@ export const validationSchema = Joi.object({
   // Google OAuth (optional)
   GOOGLE_CLIENT_ID: Joi.string().optional(),
   GOOGLE_CLIENT_SECRET: Joi.string().optional(),
-  GOOGLE_CALLBACK_URL: Joi.string()
-    .uri()
-    .default('http://localhost:3000/auth/google/callback'),
+  GOOGLE_CALLBACK_URL: Joi.string().uri().default('http://localhost:3000/auth/google/callback'),
 
   // Throttle
   THROTTLE_TTL: Joi.number().default(60000),

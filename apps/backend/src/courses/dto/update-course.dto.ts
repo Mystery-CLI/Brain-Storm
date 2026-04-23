@@ -4,7 +4,12 @@ import { StripHtmlSanitizer } from '../../common/sanitizers/strip-html.sanitizer
 
 export class UpdateCourseDto {
   @IsOptional() @IsString() @MinLength(3) @Trim() @Sanitize(StripHtmlSanitizer) title?: string;
-  @IsOptional() @IsString() @MinLength(10) @Trim() @Sanitize(StripHtmlSanitizer) description?: string;
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
+  @Trim()
+  @Sanitize(StripHtmlSanitizer)
+  description?: string;
 
   @IsOptional()
   @IsIn(['beginner', 'intermediate', 'advanced'])

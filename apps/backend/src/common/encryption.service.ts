@@ -8,7 +8,9 @@ export class EncryptionService {
   private readonly key: Buffer;
 
   constructor(private configService: ConfigService) {
-    const secret = this.configService.get<string>('ENCRYPTION_KEY') || 'default-very-long-and-secure-secret-key-32-chars-long';
+    const secret =
+      this.configService.get<string>('ENCRYPTION_KEY') ||
+      'default-very-long-and-secure-secret-key-32-chars-long';
     this.key = crypto.scryptSync(secret, 'salt', 32);
   }
 

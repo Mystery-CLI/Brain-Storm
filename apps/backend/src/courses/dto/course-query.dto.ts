@@ -12,7 +12,10 @@ export class CourseQueryDto {
   @Sanitize(StripHtmlSanitizer)
   search?: string;
 
-  @ApiPropertyOptional({ enum: ['beginner', 'intermediate', 'advanced'], description: 'Filter by course level' })
+  @ApiPropertyOptional({
+    enum: ['beginner', 'intermediate', 'advanced'],
+    description: 'Filter by course level',
+  })
   @IsOptional()
   @IsIn(['beginner', 'intermediate', 'advanced'])
   @Trim()

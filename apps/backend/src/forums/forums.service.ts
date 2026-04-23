@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from '../courses/course.entity';
@@ -19,7 +15,7 @@ export class ForumsService {
     @InjectRepository(Reply)
     private readonly replyRepo: Repository<Reply>,
     @InjectRepository(Course)
-    private readonly courseRepo: Repository<Course>,
+    private readonly courseRepo: Repository<Course>
   ) {}
 
   async findPostsByCourse(courseId: string) {
@@ -32,12 +28,7 @@ export class ForumsService {
     });
   }
 
-  async createPost(
-    courseId: string,
-    userId: string,
-    role: string,
-    dto: CreatePostDto,
-  ) {
+  async createPost(courseId: string, userId: string, role: string, dto: CreatePostDto) {
     await this.ensureCourseExists(courseId);
 
     if (dto.isPinned && !this.canModerate(role)) {
@@ -55,12 +46,7 @@ export class ForumsService {
     return this.postRepo.save(post);
   }
 
-  async createReply(
-    postId: string,
-    userId: string,
-    role: string,
-    dto: CreateReplyDto,
-  ) {
+  async createReply(postId: string, userId: string, role: string, dto: CreateReplyDto) {
     const post = await this.postRepo.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException('Post not found');

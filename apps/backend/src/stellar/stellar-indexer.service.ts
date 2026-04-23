@@ -23,10 +23,10 @@ export class StellarIndexerService implements OnModuleInit, OnModuleDestroy {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private credentialsService: CredentialsService,
     private notificationsService: NotificationsService,
-    private usersService: UsersService,
+    private usersService: UsersService
   ) {
     this.sorobanServer = new SorobanRpc.Server(
-      this.configService.get<string>('stellar.sorobanRpcUrl'),
+      this.configService.get<string>('stellar.sorobanRpcUrl') ?? ''
     );
     this.analyticsContractId = this.configService.get<string>('stellar.analyticsContractId') ?? '';
     this.tokenContractId = this.configService.get<string>('stellar.tokenContractId') ?? '';
@@ -48,7 +48,7 @@ export class StellarIndexerService implements OnModuleInit, OnModuleDestroy {
 
   private async poll() {
     try {
-      const lastLedger = await this.cacheManager.get<number>(LAST_LEDGER_KEY) ?? 0;
+      const lastLedger = (await this.cacheManager.get<number>(LAST_LEDGER_KEY)) ?? 0;
 
       const contractIds = [this.analyticsContractId, this.tokenContractId].filter(Boolean);
       const { events, latestLedger } = await this.sorobanServer.getEvents({
@@ -58,7 +58,7 @@ export class StellarIndexerService implements OnModuleInit, OnModuleDestroy {
 
       for (const event of events ?? []) {
         await this.handleEvent(event).catch((err) =>
-          this.logger.error(`Error handling event: ${err.message}`, err.stack),
+          this.logger.error(`Error handling event: ${err.message}`, err.stack)
         );
       }
 

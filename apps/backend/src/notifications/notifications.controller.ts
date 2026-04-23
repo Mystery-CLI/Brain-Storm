@@ -12,7 +12,15 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all notifications for the current user' })
-  @ApiResponse({ status: 200, description: 'Returns user notifications', schema: { example: [{ id: 'uuid', type: 'enrollment', message: 'You enrolled in Course X', read: false }] } })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns user notifications',
+    schema: {
+      example: [
+        { id: 'uuid', type: 'enrollment', message: 'You enrolled in Course X', read: false },
+      ],
+    },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll(@Request() req) {
     return this.notificationsService.findByUser(req.user.id);

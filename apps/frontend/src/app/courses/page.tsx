@@ -42,7 +42,6 @@ function SkeletonCard() {
 }
 
 export default function CoursesPage() {
-  const t = useTranslations('courses');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -69,9 +68,13 @@ export default function CoursesPage() {
     return params;
   }, [query, level, page]);
 
-  const { data, error, isLoading } = useSWR<CoursesResponse>(`/courses?${apiParams.toString()}`, fetcher, {
-    revalidateOnFocus: false,
-  });
+  const { data, error, isLoading } = useSWR<CoursesResponse>(
+    `/courses?${apiParams.toString()}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
 
   const courses = data?.data ?? [];
   const total = data?.total ?? 0;
@@ -139,14 +142,22 @@ export default function CoursesPage() {
         )}
 
         <div className="grid gap-4">
-          {isLoading
-            ? Array.from({ length: 3 }).map((_, idx) => <SkeletonCard key={idx} />)
-            : courses.length === 0
-            ? <p className="text-gray-500 dark:text-gray-400">No courses match those filters.</p>
-            : courses.map((course) => (
-              <div key={course.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-900">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{course.title}</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">{course.level} · {course.durationHours ?? '-'}h</p>
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, idx) => <SkeletonCard key={idx} />)
+          ) : courses.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400">No courses match those filters.</p>
+          ) : (
+            courses.map((course) => (
+              <div
+                key={course.id}
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-white dark:bg-gray-900"
+              >
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {course.title}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  {course.level} · {course.durationHours ?? '-'}h
+                </p>
                 <Link
                   href={`/courses/${course.id}`}
                   className="mt-3 inline-block text-blue-600 dark:text-blue-400 hover:underline"
@@ -154,7 +165,8 @@ export default function CoursesPage() {
                   View Course →
                 </Link>
               </div>
-            ))}
+            ))
+          )}
         </div>
 
         <div className="flex items-center justify-between">
@@ -165,7 +177,9 @@ export default function CoursesPage() {
           >
             Previous
           </button>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Page {page} of {totalPages}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Page {page} of {totalPages}
+          </p>
           <button
             onClick={handleNext}
             disabled={page >= totalPages || isLoading}

@@ -33,7 +33,16 @@ import { ApiKeyAuthGuard } from './api-key-auth.guard';
       }),
     }),
   ],
-  providers: [AuthService, StellarAuthService, JwtStrategy, JwtAuthGuard, RolesGuard, EncryptionService, ApiKeyStrategy, ApiKeyAuthGuard],
+  providers: [
+    AuthService,
+    StellarAuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    EncryptionService,
+    ApiKeyStrategy,
+    ApiKeyAuthGuard,
+  ],
   controllers: [AuthController],
   exports: [JwtAuthGuard, RolesGuard, ApiKeyAuthGuard],
 })

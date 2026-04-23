@@ -18,7 +18,7 @@ export class ExampleService {
     this.logger.debug('Debug message with context');
     this.logger.info('Info message - operation started');
     this.logger.warn('Warning message - something might be wrong');
-    
+
     try {
       // Simulate some operation
       throw new Error('Example error for demonstration');

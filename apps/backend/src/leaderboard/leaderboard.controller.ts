@@ -21,7 +21,7 @@ export class LeaderboardController {
     return interval(30_000).pipe(
       startWith(0),
       switchMap(() => from(this.leaderboardService.getTopUsers())),
-      map((data) => ({ data })),
+      map((data) => ({ data }))
     );
   }
 }

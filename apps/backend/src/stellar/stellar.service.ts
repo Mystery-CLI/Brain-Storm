@@ -25,25 +25,25 @@ export class StellarService {
   private networkPassphrase: string;
   private analyticsContractId: string;
   private tokenContractId: string;
+  private contractId: string;
 
   constructor(
     private configService: ConfigService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {
     const isTestnet = this.configService.get<string>('stellar.network') !== 'mainnet';
-    this.network = isTestnet ? 'testnet' : 'mainnet';
     this.networkPassphrase = isTestnet ? Networks.TESTNET : Networks.PUBLIC;
 
     this.server = new Horizon.Server(
-      isTestnet
-        ? 'https://horizon-testnet.stellar.org'
-        : 'https://horizon.stellar.org',
+      isTestnet ? 'https://horizon-testnet.stellar.org' : 'https://horizon.stellar.org'
     );
-    
-    const rpcUrl = this.configService.get<string>('stellar.sorobanRpcUrl');
+
+    const rpcUrl = this.configService.get<string>('stellar.sorobanRpcUrl') ?? '';
     this.sorobanServer = new SorobanRpc.Server(rpcUrl);
-    
-    this.contractId = this.configService.get<string>('stellar.contractId');
+
+    this.contractId = this.configService.get<string>('stellar.contractId') ?? '';
+    this.analyticsContractId = this.configService.get<string>('stellar.analyticsContractId') ?? '';
+    this.tokenContractId = this.configService.get<string>('stellar.tokenContractId') ?? '';
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -58,7 +58,9 @@ export class StellarService {
     if (network !== 'testnet') {
       throw new Error('Friendbot is only available on testnet');
     }
-    const response = await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`);
+    const response = await fetch(
+      `https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`
+    );
     if (!response.ok) {
       const body = await response.text();
       throw new Error(`Friendbot error: ${body}`);
@@ -66,34 +68,32 @@ export class StellarService {
     return { message: `Account ${publicKey} funded successfully` };
   }
 
-  private async retryWithBackoff<T>(
-    fn: () => Promise<T>,
-    attempt: number = 1,
-  ): Promise<T> {
-    try {
-      return await fn();
-    } catch (error) {
-      if (attempt >= MAX_RETRIES) {
-        this.logger.error(`Max retries reached: ${error.message}`);
-        throw error;
-      }
-      const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
-      this.logger.warn(`Attempt ${attempt} failed, retrying in ${delay}ms: ${error.message}`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return this.retryWithBackoff(fn, attempt + 1);
-    }
-  }
-
   async issueCredential(recipientPublicKey: string, courseId: string): Promise<string> {
     try {
       await this.retryWithBackoff(() => this.recordProgressOnChain(recipientPublicKey, courseId));
       this.logger.log(`Progress recorded on Soroban for ${courseId}`);
     } catch (error) {
-      this.logger.error(`Failed to record progress on Soroban: ${error.message}, falling back to Horizon`);
+      this.logger.error(
+        `Failed to record progress on Soroban: ${error.message}, falling back to Horizon`
+      );
       await this.issueCredentialFallback(recipientPublicKey, courseId);
     }
-    
+
     return this.mintCredentialViaHorizon(recipientPublicKey, courseId);
+  }
+
+  async recordProgress(
+    studentPublicKey: string,
+    courseId: string,
+    _progressPct: number
+  ): Promise<string> {
+    return this.retryWithBackoff(() =>
+      this.invokeContract(this.analyticsContractId ?? this.contractId, 'record_progress', [
+        new Address(studentPublicKey).toScVal(),
+        nativeToScVal(courseId, { type: 'symbol' }),
+        nativeToScVal(_progressPct, { type: 'i32' }),
+      ])
+    );
   }
 
   /** Read BST balance for an address from the Token contract (read-only simulate) */
@@ -107,7 +107,7 @@ export class StellarService {
     if (cached !== undefined && cached !== null) return cached;
 
     const issuerKeypair = Keypair.fromSecret(
-      this.configService.get<string>('stellar.secretKey'),
+      this.configService.get<string>('stellar.secretKey') ?? ''
     );
     const source = await this.sorobanServer.getAccount(issuerKeypair.publicKey());
 
@@ -120,7 +120,7 @@ export class StellarService {
           contract: this.tokenContractId,
           function: 'balance',
           args: [new Address(stellarPublicKey).toScVal()],
-        }),
+        })
       )
       .setTimeout(30)
       .build();
@@ -132,17 +132,14 @@ export class StellarService {
     }
 
     const retVal = (simResult as SorobanRpc.Api.SimulateTransactionSuccessResponse).result?.retval;
-    const balance = retVal ? BigInt(retVal.value() as bigint).toString() : '0';
+    const balance = retVal ? BigInt(retVal.value() as unknown as bigint).toString() : '0';
 
     await this.cacheManager.set(cacheKey, balance, 30_000);
     return balance;
   }
 
   /** Mint reward tokens via the Token Soroban contract */
-  async mintReward(
-    recipientPublicKey: string,
-    amount: number,
-  ): Promise<string> {
+  async mintReward(recipientPublicKey: string, amount: number): Promise<string> {
     if (!this.tokenContractId) {
       throw new Error('TOKEN_CONTRACT_ID not configured');
     }
@@ -150,53 +147,49 @@ export class StellarService {
       this.invokeContract(this.tokenContractId, 'mint_reward', [
         new Address(recipientPublicKey).toScVal(),
         nativeToScVal(amount, { type: 'i128' }),
-      ]),
+      ])
     );
   }
 
-    const issuerKeypair = Keypair.fromSecret(this.configService.get<string>('stellar.secretKey'));
-    const studentKeypair = Keypair.fromPublicKey(studentPublicKey);
-    
-    const source = await this.sorobanServer.getAccount(issuerKeypair.publicKey());
-    
-    const tx = new SorobanRpc.TransactionBuilder(source, {
-      fee: BASE_FEE.toString(),
-      networkPassphrase: this.networkPassphrase,
-    })
-      .setTimeout(30)
-      .appendOperation(
-        new SorobanRpc.InvokeContractOperation({
-          contract: this.contractId,
-          method: 'record_progress',
-          args: [
-            new SorobanRpc.Address(studentKeypair.publicKey()).toScVal(),
-            new SorobanRpc.Symbol(courseId).toScVal(),
-            SorobanRpc.xdr.Int32.of(100).toScVal(),
-          ],
-        }),
-      )
-      .build();
+  // ── Private helpers ───────────────────────────────────────────────────────
 
-    const preparedTx = await this.sorobanServer.prepareTransaction(tx);
-    preparedTx.sign(issuerKeypair);
-    const result = await this.sorobanServer.sendTransaction(preparedTx);
-    
-    if (SorobanRpc.TxFailed(result)) {
-      throw new Error(`Soroban contract call failed: ${result.hash}`);
-    }
+  private async recordProgressOnChain(studentPublicKey: string, courseId: string): Promise<void> {
+    await this.invokeContract(this.analyticsContractId ?? this.contractId, 'record_progress', [
+      new Address(studentPublicKey).toScVal(),
+      nativeToScVal(courseId, { type: 'symbol' }),
+      nativeToScVal(100, { type: 'i32' }),
+    ]);
   }
 
-  private async issueCredentialFallback(recipientPublicKey: string, courseId: string): Promise<string> {
-    const issuerKeypair = Keypair.fromSecret(this.configService.get<string>('stellar.secretKey'));
+  private async issueCredentialFallback(
+    recipientPublicKey: string,
+    courseId: string
+  ): Promise<void> {
+    const issuerKeypair = Keypair.fromSecret(
+      this.configService.get<string>('stellar.secretKey') ?? ''
+    );
     const issuerAccount = await this.server.loadAccount(issuerKeypair.publicKey());
 
-  private async invokeContract(
-    contractId: string,
-    method: string,
-    args: any[],
-  ): Promise<string> {
+    const tx = new TransactionBuilder(issuerAccount, {
+      fee: BASE_FEE,
+      networkPassphrase: this.networkPassphrase,
+    })
+      .addOperation(
+        Operation.manageData({
+          name: `brain-storm:credential:${courseId}`,
+          value: recipientPublicKey,
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    tx.sign(issuerKeypair);
+    await this.server.submitTransaction(tx);
+  }
+
+  private async invokeContract(contractId: string, method: string, args: any[]): Promise<string> {
     const issuerKeypair = Keypair.fromSecret(
-      this.configService.get('STELLAR_SECRET_KEY')!,
+      this.configService.get<string>('stellar.secretKey') ?? ''
     );
     const source = await this.sorobanServer.getAccount(issuerKeypair.publicKey());
 
@@ -209,7 +202,7 @@ export class StellarService {
           contract: contractId,
           function: method,
           args,
-        }),
+        })
       )
       .setTimeout(30)
       .build();
@@ -221,8 +214,13 @@ export class StellarService {
     return result.hash;
   }
 
-  private async mintCredentialViaHorizon(recipientPublicKey: string, courseId: string): Promise<string> {
-    const issuerKeypair = Keypair.fromSecret(this.configService.get<string>('stellar.secretKey'));
+  private async mintCredentialViaHorizon(
+    recipientPublicKey: string,
+    courseId: string
+  ): Promise<string> {
+    const issuerKeypair = Keypair.fromSecret(
+      this.configService.get<string>('stellar.secretKey') ?? ''
+    );
     const issuerAccount = await this.server.loadAccount(issuerKeypair.publicKey());
 
     const tx = new TransactionBuilder(issuerAccount, {
@@ -233,7 +231,7 @@ export class StellarService {
         Operation.manageData({
           name: `brain-storm:credential:${courseId}`,
           value: recipientPublicKey,
-        }),
+        })
       )
       .setTimeout(30)
       .build();
@@ -244,10 +242,7 @@ export class StellarService {
     return result.hash;
   }
 
-  private async retryWithBackoff<T>(
-    fn: () => Promise<T>,
-    attempt = 1,
-  ): Promise<T> {
+  private async retryWithBackoff<T>(fn: () => Promise<T>, attempt = 1): Promise<T> {
     try {
       return await fn();
     } catch (error) {

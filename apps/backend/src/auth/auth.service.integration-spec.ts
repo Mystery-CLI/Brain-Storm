@@ -72,15 +72,15 @@ describe('AuthService (Integration)', () => {
     it('should reject duplicate email', async () => {
       await service.register('duplicate@example.com', 'password123');
 
-      await expect(
-        service.register('duplicate@example.com', 'password123'),
-      ).rejects.toThrow('Email already in use');
+      await expect(service.register('duplicate@example.com', 'password123')).rejects.toThrow(
+        'Email already in use'
+      );
     });
   });
 
   describe('login', () => {
     beforeEach(async () => {
-      const user = await usersService.create({
+      await usersService.create({
         email: 'login@example.com',
         passwordHash: '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/KFm', // 'password'
         isVerified: true,
@@ -96,9 +96,9 @@ describe('AuthService (Integration)', () => {
     });
 
     it('should reject invalid password', async () => {
-      await expect(
-        service.login('login@example.com', 'wrongpassword'),
-      ).rejects.toThrow('Invalid credentials');
+      await expect(service.login('login@example.com', 'wrongpassword')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject unverified user', async () => {
@@ -108,9 +108,9 @@ describe('AuthService (Integration)', () => {
         isVerified: false,
       });
 
-      await expect(
-        service.login('unverified@example.com', 'password'),
-      ).rejects.toThrow('Please verify your email');
+      await expect(service.login('unverified@example.com', 'password')).rejects.toThrow(
+        'Please verify your email'
+      );
     });
 
     it('should reject banned user', async () => {
@@ -121,15 +121,15 @@ describe('AuthService (Integration)', () => {
         isBanned: true,
       });
 
-      await expect(
-        service.login('banned@example.com', 'password'),
-      ).rejects.toThrow('Account is banned');
+      await expect(service.login('banned@example.com', 'password')).rejects.toThrow(
+        'Account is banned'
+      );
     });
   });
 
   describe('verifyEmail', () => {
     it('should verify email with valid token', async () => {
-      const user = await usersService.create({
+      await usersService.create({
         email: 'verify@example.com',
         passwordHash: 'hash',
         isVerified: false,

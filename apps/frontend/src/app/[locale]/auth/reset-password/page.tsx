@@ -49,10 +49,10 @@ export default function ResetPasswordPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-8">
         <div className="max-w-md w-full bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{t('invalidToken')}</h1>
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
-            {t('tokenMissing')}
-          </p>
+          <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+            {t('invalidToken')}
+          </h1>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">{t('tokenMissing')}</p>
           <Link
             href="/auth/forgot-password"
             className="text-blue-700 dark:text-blue-400 hover:underline"
@@ -67,7 +67,9 @@ export default function ResetPasswordPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="max-w-md w-full bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{t('resetPassword')}</h1>
+        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          {t('resetPassword')}
+        </h1>
         {error && (
           <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded">
             {error}
@@ -85,7 +87,10 @@ export default function ResetPasswordPage() {
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               {t('newPassword')}
             </label>
             <input
@@ -99,7 +104,10 @@ export default function ResetPasswordPage() {
             />
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               {t('confirmPassword')}
             </label>
             <input

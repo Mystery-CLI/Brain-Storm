@@ -30,12 +30,18 @@ interface CourseData {
 }
 
 function SkeletonItem({ width = 'w-full', height = 'h-6' }: { width?: string; height?: string }) {
-  return <div className={`bg-gray-200 dark:bg-gray-700 rounded ${width} ${height} animate-pulse`} />;
+  return (
+    <div className={`bg-gray-200 dark:bg-gray-700 rounded ${width} ${height} animate-pulse`} />
+  );
 }
 
 export default function DashboardPage() {
   const { state } = useAuth();
-  const [user, setUser] = useState<UserData | null>(state.user ? { id: state.user.id, username: state.user.username, email: state.user.email } : null);
+  const [user, setUser] = useState<UserData | null>(
+    state.user
+      ? { id: state.user.id, username: state.user.username, email: state.user.email }
+      : null
+  );
   const [tokenBalance, setTokenBalance] = useState<number | null>(null);
   const [progress, setProgress] = useState<ProgressRecord[]>([]);
   const [courses, setCourses] = useState<Record<string, CourseData>>({});
@@ -85,7 +91,11 @@ export default function DashboardPage() {
           course: c.course ? { id: c.course.id, title: c.course.title } : undefined,
         }));
 
-        setCredentials(credentialsList.sort((a, b) => Number(new Date(b.issuedAt)) - Number(new Date(a.issuedAt))));
+        setCredentials(
+          credentialsList.sort(
+            (a, b) => Number(new Date(b.issuedAt)) - Number(new Date(a.issuedAt))
+          )
+        );
 
         const courseIds = Array.from(new Set(progressRecords.map((p) => p.courseId)));
         const courseMap: Record<string, CourseData> = {};
@@ -101,7 +111,7 @@ export default function DashboardPage() {
             } catch {
               // ignore missing course details
             }
-          }),
+          })
         );
 
         setCourses(courseMap);
@@ -152,55 +162,86 @@ export default function DashboardPage() {
         )}
 
         <section>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">BST Token Balance</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            BST Token Balance
+          </h2>
           <div className="mt-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
             {isLoading ? (
               <SkeletonItem width="w-32" height="h-7" />
             ) : (
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400">{tokenBalance ?? 0} BST</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {tokenBalance ?? 0} BST
+              </p>
             )}
           </div>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Enrolled Courses</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Enrolled Courses
+          </h2>
           <div className="mt-3 space-y-4">
-            {isLoading
-              ? Array.from({ length: 3 }).map((_, idx) => (
-                  <div key={idx} className="space-y-2"> 
-                    <SkeletonItem width="w-2/5" height="h-5" />
-                    <div className="h-3 w-full rounded bg-gray-200 dark:bg-gray-700" />
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="space-y-2">
+                  <SkeletonItem width="w-2/5" height="h-5" />
+                  <div className="h-3 w-full rounded bg-gray-200 dark:bg-gray-700" />
+                </div>
+              ))
+            ) : enrolledCourses.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400">
+                You have not enrolled in any courses yet.
+              </p>
+            ) : (
+              enrolledCourses.map((course) => (
+                <div
+                  key={course.id}
+                  className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+                      {course.title}
+                    </h3>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {course.progressPct}%
+                    </span>
                   </div>
-                ))
-              : enrolledCourses.length === 0
-                ? <p className="text-gray-500 dark:text-gray-400">You have not enrolled in any courses yet.</p>
-                : enrolledCourses.map((course) => (
-                  <div key={course.id} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-100">{course.title}</h3>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{course.progressPct}%</span>
-                    </div>
-                    <div className="mt-2 h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                      <div className="h-full rounded-full bg-blue-500" style={{ width: `${course.progressPct}%` }} />
-                    </div>
+                  <div className="mt-2 h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div
+                      className="h-full rounded-full bg-blue-500"
+                      style={{ width: `${course.progressPct}%` }}
+                    />
                   </div>
-                ))}
+                </div>
+              ))
+            )}
           </div>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Recent Credentials</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Recent Credentials
+          </h2>
           <div className="mt-3 space-y-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-            {isLoading
-              ? Array.from({ length: 3 }).map((_, idx) => <SkeletonItem key={idx} width="w-full" height="h-6" />)
-              : recentCredentials.length === 0
-                ? <p className="text-gray-500 dark:text-gray-400">You have not earned any credentials yet.</p>
-                : recentCredentials.map((cred) => (
-                  <div key={cred.id} className="flex justify-between items-center text-sm text-gray-700 dark:text-gray-300">
-                    <span>{cred.course?.title ?? `Course ${cred.courseId}`}</span>
-                    <span>{new Date(cred.issuedAt).toLocaleDateString()}</span>
-                  </div>
-                ))}
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <SkeletonItem key={idx} width="w-full" height="h-6" />
+              ))
+            ) : recentCredentials.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400">
+                You have not earned any credentials yet.
+              </p>
+            ) : (
+              recentCredentials.map((cred) => (
+                <div
+                  key={cred.id}
+                  className="flex justify-between items-center text-sm text-gray-700 dark:text-gray-300"
+                >
+                  <span>{cred.course?.title ?? `Course ${cred.courseId}`}</span>
+                  <span>{new Date(cred.issuedAt).toLocaleDateString()}</span>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </main>

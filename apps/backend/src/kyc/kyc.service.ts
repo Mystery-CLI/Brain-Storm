@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -11,7 +11,7 @@ export class KycService {
 
   constructor(
     @InjectRepository(KycCustomer) private repo: Repository<KycCustomer>,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
     this.apiKey = this.configService.get<string>('kyc.providerApiKey') ?? '';
   }
@@ -27,7 +27,7 @@ export class KycService {
 
   async upsertCustomer(
     stellarPublicKey: string,
-    fields: Record<string, string>,
+    fields: Record<string, string>
   ): Promise<KycCustomer> {
     let customer = await this.repo.findOne({ where: { stellarPublicKey } });
 
@@ -63,7 +63,11 @@ export class KycService {
   }
 
   /** Called by the webhook endpoint when the provider sends a status update */
-  async handleWebhook(payload: { alias?: string; session_id?: string; status: string }): Promise<void> {
+  async handleWebhook(payload: {
+    alias?: string;
+    session_id?: string;
+    status: string;
+  }): Promise<void> {
     const where = payload.alias
       ? { stellarPublicKey: payload.alias }
       : { providerId: payload.session_id };

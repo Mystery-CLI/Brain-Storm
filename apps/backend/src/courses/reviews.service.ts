@@ -20,7 +20,7 @@ export class ReviewsService {
     @InjectRepository(Enrollment)
     private readonly enrollmentRepo: Repository<Enrollment>,
     @InjectRepository(Course)
-    private readonly courseRepo: Repository<Course>,
+    private readonly courseRepo: Repository<Course>
   ) {}
 
   async create(courseId: string, userId: string, dto: CreateReviewDto) {
@@ -37,7 +37,7 @@ export class ReviewsService {
 
     if (!enrollment || !enrollment.completedAt) {
       throw new UnprocessableEntityException(
-        'Only users with completed enrollments can review this course',
+        'Only users with completed enrollments can review this course'
       );
     }
 

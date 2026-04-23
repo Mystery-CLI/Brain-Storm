@@ -4,7 +4,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { DataSource } from 'typeorm';
 import { CoursesService } from './courses.service';
 import { Course } from './course.entity';
-import { setupTestDatabase, teardownTestDatabase, getTestDataSource } from '../test/integration-test.setup';
+import { setupTestDatabase, teardownTestDatabase } from '../test/integration-test.setup';
 
 describe('CoursesService (Integration)', () => {
   let service: CoursesService;
@@ -15,10 +15,7 @@ describe('CoursesService (Integration)', () => {
     dataSource = await setupTestDatabase();
 
     module = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forFeature([Course]),
-        CacheModule.register(),
-      ],
+      imports: [TypeOrmModule.forFeature([Course]), CacheModule.register()],
       providers: [CoursesService],
     })
       .overrideProvider('DataSource')

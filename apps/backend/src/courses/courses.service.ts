@@ -14,7 +14,7 @@ export class CoursesService {
 
   constructor(
     @InjectRepository(Course) private repo: Repository<Course>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   async findAll(query: CourseQueryDto = {}) {
@@ -26,10 +26,9 @@ export class CoursesService {
       .andWhere('course.isDeleted = :isDeleted', { isDeleted: false });
 
     if (search) {
-      qb.andWhere(
-        '(course.title ILIKE :search OR course.description ILIKE :search)',
-        { search: `%${search}%` },
-      );
+      qb.andWhere('(course.title ILIKE :search OR course.description ILIKE :search)', {
+        search: `%${search}%`,
+      });
     }
 
     if (level) {
@@ -49,10 +48,7 @@ export class CoursesService {
       .getRawAndEntities();
 
     const averageRatings = new Map(
-      raw.map((item, index) => [
-        entities[index].id,
-        Number(item.course_averageRating) || 0,
-      ]),
+      raw.map((item, index) => [entities[index].id, Number(item.course_averageRating) || 0])
     );
 
     const data = entities.map((course) => ({

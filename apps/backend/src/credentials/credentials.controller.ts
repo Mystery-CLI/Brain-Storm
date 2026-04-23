@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -23,7 +23,7 @@ import { CertificatePdfService } from './certificate-pdf.service';
 export class CredentialsController {
   constructor(
     private credentialsService: CredentialsService,
-    private certificatePdfService: CertificatePdfService,
+    private certificatePdfService: CertificatePdfService
   ) {}
 
   @Get(':id/pdf')
@@ -41,7 +41,15 @@ export class CredentialsController {
 
   @Get(':userId')
   @ApiOperation({ summary: 'List all credentials for a user' })
-  @ApiResponse({ status: 200, description: 'List of credentials', schema: { example: [{ id: 'uuid', courseId: 'uuid', txHash: 'abc123', issuedAt: '2024-01-01T00:00:00.000Z' }] } })
+  @ApiResponse({
+    status: 200,
+    description: 'List of credentials',
+    schema: {
+      example: [
+        { id: 'uuid', courseId: 'uuid', txHash: 'abc123', issuedAt: '2024-01-01T00:00:00.000Z' },
+      ],
+    },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findByUser(@Param('userId') userId: string) {
     return this.credentialsService.findByUser(userId);
@@ -49,7 +57,11 @@ export class CredentialsController {
 
   @Get('verify/:txHash')
   @ApiOperation({ summary: 'Verify a credential on-chain by transaction hash' })
-  @ApiResponse({ status: 200, description: 'Verification result', schema: { example: { valid: true, txHash: 'abc123' } } })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification result',
+    schema: { example: { valid: true, txHash: 'abc123' } },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
   verify(@Param('txHash') txHash: string) {
@@ -60,8 +72,14 @@ export class CredentialsController {
   @UseGuards(AuthGuard(['jwt', 'api-key']), RolesGuard)
   @Roles('admin')
   @ApiOperation({ summary: 'Admin: manually issue a credential' })
-  @ApiBody({ schema: { example: { userId: 'uuid', courseId: 'uuid', stellarPublicKey: 'GABC...' } } })
-  @ApiResponse({ status: 201, description: 'Credential issued', schema: { example: { id: 'uuid', txHash: 'abc123' } } })
+  @ApiBody({
+    schema: { example: { userId: 'uuid', courseId: 'uuid', stellarPublicKey: 'GABC...' } },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Credential issued',
+    schema: { example: { id: 'uuid', txHash: 'abc123' } },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - admin role required' })
   issue(@Body() body: { userId: string; courseId: string; stellarPublicKey: string }) {

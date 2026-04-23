@@ -75,7 +75,7 @@ describe('StellarService', () => {
     const setTimeout = jest.fn().mockReturnThis();
     const build = jest.fn().mockReturnValue(builtTx);
 
-    ((TransactionBuilder as unknown) as jest.Mock).mockImplementation(() => ({
+    (TransactionBuilder as unknown as jest.Mock).mockImplementation(() => ({
       addOperation,
       setTimeout,
       build,

@@ -10,6 +10,12 @@ Brain-Storm is a full-stack, monorepo education platform that leverages the Stel
 
 The platform combines a modern web frontend, a scalable REST API backend, and a suite of Soroban smart contracts — all living in a single monorepo for streamlined development and deployment.
 
+## Architecture
+
+![Brain-Storm System Architecture](./docs/architecture.svg)
+
+> Full diagram with data-flow annotations: [`docs/architecture.md`](./docs/architecture.md)
+
 ---
 
 ## Monorepo Structure

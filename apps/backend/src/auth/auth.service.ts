@@ -15,7 +15,15 @@ import { RefreshToken } from './refresh-token.entity';
 import { ApiKey } from './api-key.entity';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { authenticator } from 'otplib';
+import { TOTP, generateSecret } from 'otplib';
+
+const authenticator = {
+  generateSecret: () => generateSecret(),
+  keyuri: (account: string, issuer: string, secret: string) =>
+    new TOTP().toURI({ label: account, issuer, secret } as any),
+  verify: ({ token, secret }: { token: string; secret: string }) =>
+    (new TOTP().verify as any)(token, { secret }) as boolean,
+};
 import * as qrcode from 'qrcode';
 import { EncryptionService } from '../common/encryption.service';
 
@@ -31,15 +39,22 @@ export class AuthService {
     private refreshTokenRepo: Repository<RefreshToken>,
     @InjectRepository(ApiKey)
     private apiKeyRepo: Repository<ApiKey>,
-    private encryptionService: EncryptionService,
-  ) { }
+    private encryptionService: EncryptionService
+  ) {}
 
-  async register(email: string, password: string) {
+  async register(email: string, password: string, refCode?: string) {
     const existing = await this.usersService.findByEmail(email);
     if (existing) throw new BadRequestException('Email already in use');
 
     const passwordHash = await bcrypt.hash(password, 10);
     const { token, hash, expiresAt } = this.generateOpaqueToken(24);
+    const referralCode = crypto.randomBytes(6).toString('hex');
+
+    let referredBy: string | null = null;
+    if (refCode) {
+      const referrer = await this.usersService.findByReferralCode(refCode);
+      if (referrer) referredBy = referrer.id;
+    }
 
     const user = await this.usersService.create({
       email,
@@ -47,6 +62,8 @@ export class AuthService {
       isVerified: false,
       verificationToken: hash,
       verificationTokenExpiresAt: expiresAt,
+      referralCode,
+      referredBy,
     });
 
     await this.mailService.sendVerificationEmail(user.email, token);
@@ -164,7 +181,7 @@ export class AuthService {
 
     const { token, hash, expiresAt } = this.generateOpaqueToken(1);
     await this.resetTokenRepo.save(
-      this.resetTokenRepo.create({ tokenHash: hash, userId: user.id, expiresAt, used: false }),
+      this.resetTokenRepo.create({ tokenHash: hash, userId: user.id, expiresAt, used: false })
     );
 
     await this.mailService.sendPasswordResetEmail(user.email, token);
@@ -243,7 +260,7 @@ export class AuthService {
         keyHash: hash,
         userId,
         isActive: true,
-      }),
+      })
     );
 
     return { apiKey: rawKey };
@@ -275,7 +292,12 @@ export class AuthService {
     };
   }
 
-  async verifyStellarSignature(userId: string, publicKey: string, signature: string, challenge: string) {
+  async verifyStellarSignature(
+    userId: string,
+    publicKey: string,
+    signature: string,
+    challenge: string
+  ) {
     try {
       // Decode the challenge
       const challengeData = JSON.parse(Buffer.from(challenge, 'base64').toString('utf8'));
@@ -312,14 +334,11 @@ export class AuthService {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   private async issueTokenPair(userId: string, email: string, role: string = 'student') {
-    const access_token = this.jwtService.sign(
-      { sub: userId, email, role },
-      { expiresIn: '15m' },
-    );
+    const access_token = this.jwtService.sign({ sub: userId, email, role }, { expiresIn: '15m' });
 
     const { token: rawRefresh, hash, expiresAt } = this.generateOpaqueToken(24 * 7); // 7 days
     await this.refreshTokenRepo.save(
-      this.refreshTokenRepo.create({ tokenHash: hash, userId, expiresAt, revoked: false }),
+      this.refreshTokenRepo.create({ tokenHash: hash, userId, expiresAt, revoked: false })
     );
 
     return { access_token, refresh_token: rawRefresh };

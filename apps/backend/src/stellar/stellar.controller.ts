@@ -12,7 +12,7 @@ import { Roles } from '../auth/roles.decorator';
 export class StellarController {
   constructor(
     private stellarService: StellarService,
-    private networkMonitorService: NetworkMonitorService,
+    private networkMonitorService: NetworkMonitorService
   ) {}
 
   @Get('network-status')
@@ -44,7 +44,13 @@ export class StellarController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Mint a credential NFT' })
   @ApiBody({ schema: { example: { recipientPublicKey: 'GABC...', courseId: 'uuid' } } })
-  @ApiResponse({ status: 201, description: 'Credential minted successfully', schema: { example: { data: 'transaction_hash', statusCode: 201, timestamp: '2024-01-01T00:00:00.000Z' } } })
+  @ApiResponse({
+    status: 201,
+    description: 'Credential minted successfully',
+    schema: {
+      example: { data: 'transaction_hash', statusCode: 201, timestamp: '2024-01-01T00:00:00.000Z' },
+    },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - admin role required' })
   mintCredential(@Body() body: { recipientPublicKey: string; courseId: string }) {
@@ -64,7 +70,13 @@ export class CredentialsController {
   @Roles('admin')
   @ApiOperation({ summary: 'Issue a credential for course completion' })
   @ApiBody({ schema: { example: { recipientPublicKey: 'GABC...', courseId: 'uuid' } } })
-  @ApiResponse({ status: 201, description: 'Credential issued successfully', schema: { example: { data: 'transaction_hash', statusCode: 201, timestamp: '2024-01-01T00:00:00.000Z' } } })
+  @ApiResponse({
+    status: 201,
+    description: 'Credential issued successfully',
+    schema: {
+      example: { data: 'transaction_hash', statusCode: 201, timestamp: '2024-01-01T00:00:00.000Z' },
+    },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - admin role required' })
   issueCredential(@Body() body: { recipientPublicKey: string; courseId: string }) {

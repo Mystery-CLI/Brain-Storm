@@ -40,7 +40,9 @@ describe('CoursesPage', () => {
 
     expect(screen.getByText('Courses')).toBeInTheDocument();
 
-    await waitFor(() => expect(screen.getByText('Intro to Stellar Blockchain')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Intro to Stellar Blockchain')).toBeInTheDocument()
+    );
     expect(screen.getByText('Soroban Smart Contracts')).toBeInTheDocument();
 
     const nextButton = screen.getByRole('button', { name: 'Next' });
@@ -54,7 +56,9 @@ describe('CoursesPage', () => {
   it('filters courses by search term', async () => {
     render(<CoursesPage />);
 
-    await waitFor(() => expect(screen.getByText('Intro to Stellar Blockchain')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Intro to Stellar Blockchain')).toBeInTheDocument()
+    );
 
     const input = screen.getByPlaceholderText('Search courses...');
     fireEvent.change(input, { target: { value: 'DeFi' } });
